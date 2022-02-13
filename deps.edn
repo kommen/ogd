@@ -1,0 +1,4 @@
+{:paths ["src" "resources"]
+ :deps  {org.clojure/clojure         {:mvn/version "1.11.0-beta1"}
+         techascent/tech.ml.dataset  {:mvn/version "6.063"}
+         io.github.nextjournal/clerk {:git/sha "72fae00d67d42122b76f9a22eeaae683d571eec4"}}}
