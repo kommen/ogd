@@ -3,23 +3,17 @@
 ^{:nextjournal.clerk/visibility :hide-ns}
 (ns dtv
   (:require [tech.v3.dataset :as ds]
-            [nextjournal.clerk :as clerk]))
+            [nextjournal.clerk :as clerk]
+            [ogd.utils :as utils]))
 
 (def ^:nextjournal.clerk/no-cache data-url
   "https://www.wien.gv.at/verkehr/verkehrsmanagement/ogd/dauerzaehlstellen.csv")
 
 ;; Quelle: https://www.data.gv.at/katalog/dataset/4707e82a-154f-48b2-864c-89fffc6334e1
 
-(defn string->stream
-  ([s] (string->stream s "UTF-8"))
-  ([s encoding]
-   (-> s
-       (.getBytes encoding)
-       (java.io.ByteArrayInputStream.))))
-
 (def csv-data
   (ds/->dataset
-   (string->stream (slurp data-url :encoding "ISO-8859-1"))
+   (utils/string->stream (slurp data-url :encoding "ISO-8859-1"))
    {:separator \;
     :file-type :csv}))
 
@@ -46,9 +40,6 @@
 ;; TVMAXT = Wochentag und Datum des TVMAX, * =Tag enthält geschätzte Werte -29 = Negative Werte kennzeichnen nicht verfügbare Werte (z.B. Ausfälle oder Gegenrichtung in Einbahnstraßen)
 ;; ```
 
-(def month-str->int
-  {"JAN." 1 "FEB." 2 "MÄRZ" 3 "APRIL" 4 "MAI" 5 "JUNI" 6
-   "JULI" 7 "AUG." 8 "SEP." 9 "OKT" 10 "NOV" 11 "DEZ." 12})
 
 (def dtv-graph
   {:width 650
@@ -72,8 +63,6 @@
                            :timeUnit "yearmonth"}
                        :y {:field "DTVMF"
                            :aggregate "sum"}}}]
-
-
    :config {:view {:stroke :transparent}
             :axis {:domainWidth 1} }})
 
@@ -85,7 +74,7 @@
         (map
          (fn [[znr znr-ds]]
            (let [d (-> znr-ds
-                       (ds/column-map "MONAT" month-str->int
+                       (ds/column-map "MONAT" utils/month-str->int
                                       {:datatype :int8}
                                       ["MONAT"])
                        (ds/filter-column "FZTYP" #(= "Kfz" %))
