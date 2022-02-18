@@ -6,7 +6,7 @@
             [nextjournal.clerk :as clerk]
             [ogd.utils :as utils]))
 
-(def ^:nextjournal.clerk/no-cache data-url
+(def data-url
   "https://www.wien.gv.at/verkehr/verkehrsmanagement/ogd/dauerzaehlstellen.csv")
 
 ;; Quelle: https://www.data.gv.at/katalog/dataset/4707e82a-154f-48b2-864c-89fffc6334e1
