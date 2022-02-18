@@ -81,12 +81,13 @@
                        (ds/filter-column "DTVMF" #(< 0 %)))]
              (reduce (fn [m [ri ri-ds]]
                        (let [zname (first (get ri-ds "ZNAME"))
-                             current? (= 2021 (apply max (get ri-ds "JAHR")))]
+                             current? (<= 2021 (apply max (get ri-ds "JAHR")))]
                          (when current?
                            (assoc m
-                                  (str znr " - " zname " - " ri)
+                                  (str zname " - " ri " - " znr)
                                   (-> dtv-graph
-                                      (assoc :title {:text (str znr " - " zname " - " ri)})
+                                      (assoc :title {:text (str zname " - " ri)
+                                                     :subtitle (str "Zählstelle Nr. " znr " in Richtung " ri)})
                                       (assoc-in [:data :values] (into [] (ds/mapseq-reader ri-ds))))))))
                      {}
                      (ds/group-by-column d "RINAME"))))))))
