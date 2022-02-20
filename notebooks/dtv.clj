@@ -3,6 +3,7 @@
 ^{:nextjournal.clerk/visibility :hide-ns}
 (ns dtv
   (:require [tech.v3.dataset :as ds]
+            [tech.v3.dataset.join :as ds-join]
             [nextjournal.clerk :as clerk]
             [ogd.utils :as utils]))
 
@@ -41,6 +42,20 @@
 ;; ```
 
 
+(def locations-url "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&srsName=EPSG:4326&outputFormat=csv&typeName=ogdwien:DAUERZAEHLOGD")
+
+^::clerk/no-cache
+(def locations-ds
+  (ds/->dataset
+   locations-url
+   {:separator \,
+    :file-type :csv}))
+
+
+(defn shape->latlng [shape-str]
+  (let [[lng lat] (rest (re-matches #"POINT \((.*?) (.*?)\)" shape-str))]
+    {:lat (parse-double lat) :lng (parse-double lng)}))
+
 (def dtv-graph
   {:width 650
    :height 350
@@ -70,27 +85,30 @@
 (def counting-points
   (apply
    merge
-   (->> (ds/group-by-column csv-data "ZNR")
-        (map
-         (fn [[znr znr-ds]]
-           (let [d (-> znr-ds
-                       (ds/column-map "MONAT" utils/month-str->int
-                                      {:datatype :int8}
-                                      ["MONAT"])
-                       (ds/filter-column "FZTYP" #(= "Kfz" %))
-                       (ds/filter-column "DTVMF" #(< 0 %)))]
-             (reduce (fn [m [ri ri-ds]]
-                       (let [zname (first (get ri-ds "ZNAME"))
-                             current? (<= 2021 (apply max (get ri-ds "JAHR")))]
-                         (when current?
-                           (assoc m
-                                  (str zname " - " ri " - " znr)
-                                  (-> dtv-graph
-                                      (assoc :title {:text (str zname " - " ri)
-                                                     :subtitle (str "Zählstelle Nr. " znr " in Richtung " ri)})
-                                      (assoc-in [:data :values] (into [] (ds/mapseq-reader ri-ds))))))))
-                     {}
-                     (ds/group-by-column d "RINAME"))))))))
+   (->>
+    (ds/group-by-column (ds-join/left-join ["ZNR" "ZST_ID"] csv-data locations-ds)
+                        "ZNR")
+    (map
+     (fn [[znr znr-ds]]
+       (let [d (-> znr-ds
+                   (ds/column-map "MONAT" utils/month-str->int
+                                  {:datatype :int8}
+                                  ["MONAT"])
+                   (ds/filter-column "FZTYP" #(= "Kfz" %))
+                   (ds/filter-column "DTVMF" #(< 0 %)))]
+         (reduce (fn [m [ri ri-ds]]
+                   (let [zname (first (get ri-ds "ZNAME"))
+                         current? (<= 2021 (apply max (get ri-ds "JAHR")))]
+                     (when current?
+                       (assoc m
+                              (str zname " - " ri " - " znr)
+                              (-> dtv-graph
+                                  (assoc :dtv/location (shape->latlng (first (get ri-ds "SHAPE"))))
+                                  (assoc :title {:text (str zname " - " ri)
+                                                 :subtitle (str "Zählstelle Nr. " znr " in Richtung " ri)})
+                                  (assoc-in [:data :values] (into [] (ds/mapseq-reader ri-ds))))))))
+                 {}
+                 (ds/group-by-column d "RINAME"))))))))
 
 ^{::clerk/viewer
   {:fetch-fn     (fn [_ x] (assoc x :options (sort (keys counting-points))))
