@@ -10,7 +10,8 @@
 
   (clerk/serve! {:watch-paths ["notebooks" "src"]})
 
-  (clerk/serve! {:watch-paths ["notebooks" "src"] :show-filter-fn #(clojure.string/starts-with? % "notebooks")})
+  (clerk/serve! {:watch-paths ["notebooks" "src"] :show-filter-fn #(clojure.string/starts-with? % "notebooks")
+                 :browse? true})
 
   (clerk/build-static-app! {:paths ["notebooks/dtv.clj"]
                             :bundle? true}))
@@ -31,7 +32,7 @@
             :path-prefix "ogd/dtv"
             :path->url {notebook out-name
                         "" "/index.html"}
-            :path->doc (hash-map notebook (clerk/file->viewer "notebooks/graph.clj"))}))))
+            :path->doc (hash-map notebook (clerk/file->viewer notebook))}))))
 
 (comment
   (doseq [[name data] (take 2 dtv/counting-points)]
