@@ -16,7 +16,8 @@
   (ds/->dataset
    (utils/string->stream (slurp data-url :encoding "ISO-8859-1"))
    {:separator \;
-    :file-type :csv}))
+    :file-type :csv
+    :parser-fn {"SHAPE" utils/point->latlng}}))
 
 (keys (ds/head csv-data))
 
@@ -51,10 +52,6 @@
    {:separator \,
     :file-type :csv}))
 
-
-(defn shape->latlng [shape-str]
-  (let [[lng lat] (rest (re-matches #"POINT \((.*?) (.*?)\)" shape-str))]
-    {:lat (parse-double lat) :lng (parse-double lng)}))
 
 (def dtv-graph
   {:width 650
@@ -98,12 +95,13 @@
                    (ds/filter-column "DTVMF" #(< 0 %)))]
          (reduce (fn [m [ri ri-ds]]
                    (let [zname (first (get ri-ds "ZNAME"))
-                         current? (<= 2021 (apply max (get ri-ds "JAHR")))]
+                         current? (<= 2021 (apply max (get ri-ds "JAHR")))
+                         location (first (get ri-ds "SHAPE"))]
                      (when current?
                        (assoc m
                               (str zname " - " ri " - " znr)
                               (-> dtv-graph
-                                  (assoc :dtv/location (shape->latlng (first (get ri-ds "SHAPE"))))
+                                  (assoc :dtv/location location)
                                   (assoc :title {:text (str zname " - " ri)
                                                  :subtitle (str "Zählstelle Nr. " znr " in Richtung " ri)})
                                   (assoc-in [:data :values] (into [] (ds/mapseq-reader ri-ds))))))))
