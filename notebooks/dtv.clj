@@ -2,24 +2,24 @@
 
 ^{:nextjournal.clerk/visibility :hide-ns}
 (ns dtv
-  (:require [tech.v3.dataset :as ds]
-            [tech.v3.dataset.join :as ds-join]
-            [nextjournal.clerk :as clerk]
-            [ogd.utils :as utils]))
+  (:require [nextjournal.clerk :as clerk]
+            [ogd.utils :as utils]
+            [tech.v3.dataset :as ds]
+            [tech.v3.dataset.join :as ds-join]))
 
 (def data-url
   "https://www.wien.gv.at/verkehr/verkehrsmanagement/ogd/dauerzaehlstellen.csv")
 
 ;; Quelle: https://www.data.gv.at/katalog/dataset/4707e82a-154f-48b2-864c-89fffc6334e1
 
-(def csv-data
+(def counting-points-ds
   (ds/->dataset
    (utils/string->stream (slurp data-url :encoding "ISO-8859-1"))
    {:separator \;
     :file-type :csv
     :parser-fn {"SHAPE" utils/point->latlng}}))
 
-(keys (ds/head csv-data))
+(keys (ds/head counting-points-ds))
 
 ;; ```
 ;; JAHR = Zähljahr
@@ -83,7 +83,7 @@
   (apply
    merge
    (->>
-    (ds/group-by-column (ds-join/left-join ["ZNR" "ZST_ID"] csv-data locations-ds)
+    (ds/group-by-column (ds-join/left-join ["ZNR" "ZST_ID"] counting-points-ds locations-ds)
                         "ZNR")
     (map
      (fn [[znr znr-ds]]

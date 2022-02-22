@@ -34,16 +34,17 @@
                    :ref
                    (fn [el]
                      (when el
-                       (let [m (.map leaflet el (clj->js {:zoomControl false :zoomDelta 0.5 :zoomSnap 0.0}))
-                             location-latlng (.latLng leaflet lat lng)
-                             location-marker (.marker leaflet location-latlng)
-                             basemap-hidpi-layer (.tileLayer leaflet "https://{s}.wien.gv.at/basemap/bmaphidpi/normal/google3857/{z}/{y}/{x}.jpeg",
+                       (let [m                   (.map leaflet el (clj->js {:zoomControl false :zoomDelta 0.5 :zoomSnap 0.0}))
+                             location-latlng     (.latLng leaflet lat lng)
+                             location-marker     (.marker leaflet location-latlng)
+                             basemap-hidpi-layer (.tileLayer leaflet
+                                                             "https://{s}.wien.gv.at/basemap/bmaphidpi/normal/google3857/{z}/{y}/{x}.jpeg"
                                                              (clj->js
-                                                              {:subdomains ["maps", "maps1", "maps2", "maps3", "maps4"]
-                                                               :maxZoom 25
+                                                              {:subdomains    ["maps" "maps1" "maps2" "maps3" "maps4"]
+                                                               :maxZoom       25
                                                                :maxNativeZoom 19
-                                                               :attribution "basemap.at"
-                                                               :errorTileUrl "/transparent.gif"}))]
+                                                               :attribution   "basemap.at"
+                                                               :errorTileUrl  "/transparent.gif"}))]
                          (.addTo basemap-hidpi-layer m)
                          (.addTo location-marker m)
                          (.setView m location-latlng 13.7))))}])])))})
