@@ -3,6 +3,7 @@
 ^{:nextjournal.clerk/visibility :hide-ns}
 (ns dtv
   (:require [nextjournal.clerk :as clerk]
+            [tablecloth.api :as tc]
             [ogd.utils :as utils]
             [tech.v3.dataset :as ds]
             [tech.v3.dataset.join :as ds-join]))
@@ -78,6 +79,51 @@
    :config {:view {:stroke :transparent}
             :axis {:domainWidth 1} }})
 
+(def cp2
+  (-> (ds-join/left-join ["ZNR" "ZST_ID"] counting-points-ds locations-ds)
+      (tc/fold-by ["ZNAME" "RINAME" "ZNR"]
+                  #_(fn [a]
+                      a
+                      #_(let [current? (<= 2021 (apply max (get ri-ds "JAHR")))
+                              location (first (get ri-ds "SHAPE"))]
+                          (when current?
+                            (assoc m
+                                   (str zname " - " ri " - " znr)
+                                   (-> dtv-graph
+                                       (assoc :dtv/location location)
+                                       (assoc :title {:text (str zname " - " ri)
+                                                      :subtitle (str "Zählstelle Nr. " znr " in Richtung " ri)})
+                                       (assoc-in [:data :values] (into [] (ds/mapseq-reader ri-ds)))))))))
+
+      ))
+(count cp3)
+(def cp3
+  (-> (ds-join/left-join ["ZNR" "ZST_ID"] counting-points-ds locations-ds)
+      (tc/group-by ["ZNAME" "RINAME" "ZNR"]
+                   #_(fn [a]
+                       a
+                       #_(let [current? (<= 2021 (apply max (get ri-ds "JAHR")))
+                               location (first (get ri-ds "SHAPE"))]
+                           (when current?
+                             (assoc m
+                                    (str zname " - " ri " - " znr)
+                                    (-> dtv-graph
+                                        (assoc :dtv/location location)
+                                        (assoc :title {:text (str zname " - " ri)
+                                                       :subtitle (str "Zählstelle Nr. " znr " in Richtung " ri)})
+                                        (assoc-in [:data :values] (into [] (ds/mapseq-reader ri-ds)))))))))
+
+
+      (tc/select-rows (fn [r] (<= 2021 (get r "JAHR")) ))))
+
+(first (tc/rows cp2))
+(first (tc/rows (tc/fold-by (tc/dataset [[:A [1 1 1 4 5 6]] [:B ["Y" "X"]] [:C :a]])
+                            [:A])))
+
+(tc/group-by (tc/dataset [[:A [1 1 1 4 5 6]] [:B ["Y" "Y" "X" "X"]] [:C :a]])
+             (fn [r]
+               (println "r:" r)
+               (select-keys r [:A :B])))
 
 (def counting-points
   (apply
