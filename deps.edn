@@ -1,4 +1,4 @@
 {:paths ["src" "resources" "notebooks"]
- :deps  {org.clojure/clojure         {:mvn/version "1.11.0-rc1"}
+ :deps  {org.clojure/clojure         {:mvn/version "1.11.0"}
          techascent/tech.ml.dataset  {:mvn/version "6.065"}
          io.github.nextjournal/clerk {:git/sha "e33accd6a7a58d0adea05c9c87aab343c94582b1"}}}
