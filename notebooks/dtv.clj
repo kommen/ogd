@@ -3,6 +3,7 @@
 ^{:nextjournal.clerk/visibility :hide-ns}
 (ns dtv
   (:require [nextjournal.clerk :as clerk]
+            [tablecloth.api :as tc]
             [ogd.utils :as utils]
             [tech.v3.dataset :as ds]
             [tech.v3.dataset.join :as ds-join]))
@@ -17,7 +18,7 @@
    (utils/string->stream (slurp data-url :encoding "ISO-8859-1"))
    {:separator \;
     :file-type :csv
-    :parser-fn {"SHAPE" utils/point->latlng}}))
+    :parser-fn {"MONAT" [:int8 utils/month-str->int]}}))
 
 (keys (ds/head counting-points-ds))
 
@@ -50,7 +51,8 @@
   (ds/->dataset
    locations-url
    {:separator \,
-    :file-type :csv}))
+    :file-type :csv
+    :parser-fn {"SHAPE" [:object utils/point->latlng]}}))
 
 
 (def dtv-graph
@@ -79,34 +81,30 @@
             :axis {:domainWidth 1} }})
 
 
+
 (def counting-points
-  (apply
-   merge
-   (->>
-    (ds/group-by-column (ds-join/left-join ["ZNR" "ZST_ID"] counting-points-ds locations-ds)
-                        "ZNR")
-    (map
-     (fn [[znr znr-ds]]
-       (let [d (-> znr-ds
-                   (ds/column-map "MONAT" utils/month-str->int
-                                  {:datatype :int8}
-                                  ["MONAT"])
-                   (ds/filter-column "FZTYP" #(= "Kfz" %))
-                   (ds/filter-column "DTVMF" #(< 0 %)))]
-         (reduce (fn [m [ri ri-ds]]
-                   (let [zname (first (get ri-ds "ZNAME"))
-                         current? (<= 2021 (apply max (get ri-ds "JAHR")))
-                         location (first (get ri-ds "SHAPE"))]
-                     (when current?
-                       (assoc m
-                              (str zname " - " ri " - " znr)
-                              (-> dtv-graph
-                                  (assoc :dtv/location location)
-                                  (assoc :title {:text (str zname " - " ri)
-                                                 :subtitle (str "Zählstelle Nr. " znr " in Richtung " ri)})
-                                  (assoc-in [:data :values] (into [] (ds/mapseq-reader ri-ds))))))))
-                 {}
-                 (ds/group-by-column d "RINAME"))))))))
+  (-> (ds-join/left-join ["ZNR" "ZST_ID"] counting-points-ds locations-ds)
+      (ds/filter-column "FZTYP" #(= "Kfz" %))
+      (ds/filter-column "DTVMF" #(< 0 %))
+      (tc/group-by ["ZNAME" "RINAME" "ZNR"])
+
+      (tc/without-grouping->
+       (tc/drop-rows (fn [r]
+                       (> 2021 (apply max (get (:data r) "JAHR"))))))
+
+      (tc/groups->map)
+      (->>
+       (into {}
+             (map (fn [[{:strs [ZNAME RINAME ZNR]} ds]]
+                    [(str ZNAME " - " RINAME " - " ZNR)
+                     (-> dtv-graph
+                         (assoc :dtv/location (first (get ds "SHAPE")))
+                         (assoc :title {:text     (str ZNAME " - " RINAME)
+                                        :subtitle (str "Zählstelle Nr. " ZNR " in Richtung " RINAME)})
+                         (assoc-in [:data :values] (into [] (ds/mapseq-reader ds))))]))))))
+
+
+
 
 ^{::clerk/viewer
   {:fetch-fn     (fn [_ x] (assoc x :options (sort (keys counting-points))))
