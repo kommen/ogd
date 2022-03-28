@@ -2,5 +2,7 @@ target
 release
 .cache
 .cpcache/
+.clj-kondo
+public/dtv
 /.clerk/
 /.nrepl-port
