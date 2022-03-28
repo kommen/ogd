@@ -84,14 +84,16 @@
 
 (def counting-points
   (-> (ds-join/left-join ["ZNR" "ZST_ID"] counting-points-ds locations-ds)
+      ;; all cars, not only LkwÄ
       (ds/filter-column "FZTYP" #(= "Kfz" %))
+      ;; only consider rows which have a meaningful value
       (ds/filter-column "DTVMF" #(< 0 %))
+      ;; group rows by counting point
       (tc/group-by ["ZNAME" "RINAME" "ZNR"])
-
+      ;; filter grouped datasets for only ones with recent data
       (tc/without-grouping->
        (tc/drop-rows (fn [r]
                        (> 2021 (apply max (get (:data r) "JAHR"))))))
-
       (tc/groups->map)
       (->>
        (into {}
