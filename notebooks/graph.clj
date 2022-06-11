@@ -18,7 +18,7 @@
 
 (clerk/html
  [:link {:rel "stylesheet"
-         :href "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+         :href "https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
          :crossorigin ""}])
 
 ^{::clerk/viewer :hide-result}
