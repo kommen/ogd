@@ -8,10 +8,6 @@
 
   (clerk/show! "notebooks/dtv.clj")
 
-
-
-
-
   (clerk/build-static-app! {:paths ["notebooks/dtv.clj"]
                             :bundle? true}))
 
@@ -34,27 +30,19 @@
             :path->doc (hash-map notebook (clerk/file->viewer notebook))}))))
 
 (comment
+  ;; get some data into the graph
+  (reset! graph/data (val (first dtv/counting-points)))
+
+
+  ;; only some
   (doseq [[name data] (take 2 dtv/counting-points)]
     (gen-graph! name data))
 
+  ;; gen all the graphs
   (doseq [[name data] dtv/counting-points]
     (gen-graph! name data))
 
-  (doseq [[name data] dtv/counting-points]
-    (reset! graph/data data)
-    (clerk/build-static-app!
-     {:paths ["notebooks/graph.clj"]
-      :out-path (str "public/build/" (clojure.string/replace name #"\s" ""))
-      :bundle? true
-      :browse? false}))
+
 
   (reset! dtv/select-state (first (keys dtv/counting-points)))
-  (clerk/build-static-app!
-   {:paths ["notebooks/dtv.clj"]
-    :out-path (str "public/build/" (clojure.string/replace @dtv/select-state #"\s" ""))
-    :bundle? true
-    :browse? false})
-
-
-
-  (reset! graph/data (val (first dtv/counting-points))))
+  )
