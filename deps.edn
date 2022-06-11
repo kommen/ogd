@@ -2,6 +2,6 @@
  :deps  {org.clojure/clojure         {:mvn/version "1.11.0"}
          techascent/tech.ml.dataset  {:mvn/version "6.077"}
          scicloj/tablecloth          {:mvn/version "6.076"}
-         io.github.nextjournal/clerk {:git/sha "6a7690caf436b3e5eb210ea06fb31bb9f7ba3387"}
+         io.github.nextjournal/clerk {:mvn/version "0.8.451"}
 
          com.microsoft.playwright/playwright {:mvn/version "1.17.0"}}}
