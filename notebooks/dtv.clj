@@ -109,10 +109,11 @@
 
 ^{::clerk/viewer
   {:pred ::clerk/var-from-def
-   :transform-fn (comp clerk/mark-presented (clerk/update-val (fn [{::clerk/keys [var-from-def]}]
-                                                                {:var-name (symbol var-from-def)
-                                                                 :value @@var-from-def
-                                                                 :options (sort (keys counting-points)) })))
+   :transform-fn (comp clerk/mark-presented
+                       (clerk/update-val (fn [{::clerk/keys [var-from-def]}]
+                                           {:var-name (symbol var-from-def)
+                                            :value @@var-from-def
+                                            :options (sort (keys counting-points)) })))
 
    :render-fn    '(fn [{:as x :keys [var-name value options]}]
                     (v/html (into [:select {:on-change #(v/clerk-eval `(reset! ~var-name ~(.. % -target -value)))}]

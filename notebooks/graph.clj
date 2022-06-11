@@ -28,7 +28,7 @@
    '(fn [value]
       (v/html
        (when-let [{:keys [lat lng]} value]
-         [v/with-d3-require {:package ["leaflet@1.7.1/dist/leaflet.js"]}
+         [v/with-d3-require {:package ["leaflet@1.8.0/dist/leaflet.js"]}
           (fn [leaflet]
             [:div {:style {:height 400}
                    :ref
