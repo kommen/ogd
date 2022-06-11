@@ -49,7 +49,7 @@
 ^::clerk/no-cache
 (def locations-ds
   (ds/->dataset
-   locations-url
+   (utils/string->stream (slurp locations-url :encoding "ISO-8859-1"))
    {:separator \,
     :file-type :csv
     :parser-fn {"SHAPE" [:object utils/point->latlng]}}))
