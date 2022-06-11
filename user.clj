@@ -29,10 +29,14 @@
                         "" "/index.html"}
             :path->doc (hash-map notebook (clerk/file->viewer notebook))}))))
 
-(comment
-  ;; get some data into the graph
-  (reset! graph/data (val (first dtv/counting-points)))
 
+(comment
+
+  (do
+    ;; get some data into the graph
+    (reset! graph/data (rand-nth (vals dtv/counting-points)))
+
+    (clerk/recompute!))
 
   ;; only some
   (doseq [[name data] (take 2 dtv/counting-points)]
