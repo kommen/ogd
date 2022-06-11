@@ -4,9 +4,9 @@
   (:import [java.time LocalDate]))
 
 ^{::clerk/viewer
-  {:fetch-fn     (fn [_ x] x)
-   :transform-fn (fn [{:as _x ::clerk/keys [var-from-def]}]
-                   {:value @@var-from-def})
+  {:pred ::clerk/var-from-def
+   :transform-fn (comp clerk/mark-presented (clerk/update-val (fn [{::clerk/keys [var-from-def]}]
+                                                                {:value @@var-from-def})))
    :render-fn '(fn [{:as x :keys [var-name value options]}]
                  (v/html [:h1 (:text (:title value))]))}}
 (defonce data (atom nil))
@@ -23,7 +23,7 @@
 
 ^{::clerk/viewer :hide-result}
 (def leaflet
-  {:fetch-fn (fn [_ x] x)
+  {:transform-fn clerk/mark-presented
    :render-fn
    '(fn [value]
       (v/html
