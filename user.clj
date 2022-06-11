@@ -8,10 +8,9 @@
 
   (clerk/show! "notebooks/dtv.clj")
 
-  (clerk/serve! {:watch-paths ["notebooks" "src"]})
 
-  (clerk/serve! {:watch-paths ["notebooks" "src"] :show-filter-fn #(clojure.string/starts-with? % "notebooks")
-                 :browse? true})
+
+
 
   (clerk/build-static-app! {:paths ["notebooks/dtv.clj"]
                             :bundle? true}))
