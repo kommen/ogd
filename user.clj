@@ -35,7 +35,6 @@
   (do
     ;; get some data into the graph
     (reset! graph/data (rand-nth (vals dtv/counting-points)))
-
     (clerk/recompute!))
 
   ;; only some

@@ -34,6 +34,7 @@
                    :ref
                    (fn [el]
                      (when el
+                       (when-let [m (.-map el)] (.remove m))
                        (let [m                   (.map leaflet el (clj->js {:zoomControl false :zoomDelta 0.5 :zoomSnap 0.0}))
                              location-latlng     (.latLng leaflet lat lng)
                              location-marker     (.marker leaflet location-latlng)
@@ -45,6 +46,7 @@
                                                                :maxNativeZoom 19
                                                                :attribution   "basemap.at"
                                                                :errorTileUrl  "/transparent.gif"}))]
+                         (set! (.-map el) m)
                          (.addTo basemap-hidpi-layer m)
                          (.addTo location-marker m)
                          (.setView m location-latlng 13.7))))}])])))})
