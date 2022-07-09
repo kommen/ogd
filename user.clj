@@ -26,7 +26,7 @@
             :current-path notebook
             :path-prefix "ogd/dtv"
             :path->url {notebook out-name
-                        "" "/index.html"}
+                        "" "dtv/index.html"}
             :path->doc (hash-map notebook (clerk/file->viewer notebook))}))))
 
 
@@ -35,6 +35,11 @@
   (do
     ;; get some data into the graph
     (reset! graph/data (rand-nth (vals dtv/counting-points)))
+    (clerk/recompute!))
+
+  (do
+    ;; get some data into the graph
+    (reset! graph/data (get  dtv/counting-points "Burggasse II - Zentrum - 1213"))
     (clerk/recompute!))
 
   ;; only some
