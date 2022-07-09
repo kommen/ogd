@@ -51,12 +51,24 @@
                          (.addTo location-marker m)
                          (.setView m location-latlng 13.7))))}])])))})
 
+
 ;; ## Zählpunkt Standort
+
+
 
 ^::clerk/no-cache
 (clerk/with-viewer leaflet
   (when-let [d @data]
     (:dtv/location d)))
+
+(when-let [{:keys [dtv/location]} @data]
+  (clerk/html
+   [:div.text-xs.font-mono.text-slate-500
+    [:span (:lat location) ", " (:lng location) " | "]
+    [:a
+     {:href (format "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=%s,%s&heading=117&pitch=10&fov=250" (:lat location) (:lng location))
+      :target "_blank"}
+     "Auf Google Street View anzeigen"]]))
 
 ^::clerk/no-cache
 (clerk/html
