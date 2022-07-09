@@ -35,7 +35,7 @@
                    (fn [el]
                      (when el
                        (when-let [m (.-map el)] (.remove m))
-                       (let [m                   (.map leaflet el (clj->js {:zoomControl false :zoomDelta 0.5 :zoomSnap 0.0}))
+                       (let [m                   (.map leaflet el (clj->js {:zoomControl true :zoomDelta 0.5 :zoomSnap 0.0 :attributionControl false}))
                              location-latlng     (.latLng leaflet lat lng)
                              location-marker     (.marker leaflet location-latlng)
                              basemap-hidpi-layer (.tileLayer leaflet
@@ -61,6 +61,7 @@
   (when-let [d @data]
     (:dtv/location d)))
 
+^::clerk/no-cache
 (when-let [{:keys [dtv/location]} @data]
   (clerk/html
    [:div.text-xs.font-mono.text-slate-500
@@ -72,8 +73,13 @@
 
 ^::clerk/no-cache
 (clerk/html
- [:p "Erstellt am " (str (LocalDate/now)) " von " [:a.text-blue.underline {:href "https://twitter.com/DieterKomendera"} "Dieter Komendera"]])
-
-;; Karte: https://basemap.at |
-;; Datenquelle: Stadt Wien – https://data.wien.gv.at |
-;; Datensatz: [Verkehrszählstellen Zählwerte Wien](https://www.data.gv.at/katalog/dataset/4707e82a-154f-48b2-864c-89fffc6334e1)
+ [:div.text-xs.font-mono.text-slate-500
+  [:p
+   "Karte:"
+   [:a {:href "https://basemap.at"} "basemap.at"] " | "
+   "Datenquelle: Stadt Wien – "
+   [:a {:href "https://data.wien.gv.at"} "data.wien.gv.at"] " | "
+   "Datensatz: "
+   [:a {:href "https://www.data.gv.at/katalog/dataset/4707e82a-154f-48b2-864c-89fffc6334e1" }
+    "Verkehrszählstellen Zählwerte Wien"]]
+  [:p "Erstellt am " (str (LocalDate/now)) " von " [:a.text-blue.underline {:href "https://twitter.com/DieterKomendera"} "Dieter Komendera"]]])
