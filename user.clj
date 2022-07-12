@@ -13,10 +13,8 @@
                             :bundle? true})
 
 
-  (spit
-   "public/dtv/index.html"
-   (view/doc->static-html (clerk.eval/eval-file  "notebooks/index.clj")))
-  )
+  (spit "public/dtv/index.html"
+        (view/doc->static-html (clerk.eval/eval-file "notebooks/index.clj"))))
 
 
 (defn gen-graph! [name data]

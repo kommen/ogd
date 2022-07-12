@@ -9,14 +9,12 @@
 ;;# Übersicht Dauerzählstellen der Stadt Wien
 ^{::clerk/viewer clerk/hide-result}
 (defn path->title [f]
-  (let [path (str (.relativize (.toPath (io/file "public")) (.toPath f)))]
-    (when-let [name (second (re-matches #".*/(.*)-([\d]*)\.html" path))]
+  (let [path (str (.relativize (.toPath (io/file "public/dtv")) (.toPath f)))]
+    (when-let [name (second (re-matches #"(.*)-([\d]*)\.html" path))]
       [:a {:href path}
        (interleave (map str/capitalize (str/split name #"-"))
                    (repeat " "))])))
 
-^{::clerk/viewer clerk/hide-result}
-{:foo "bar"}
 
 (clerk/html
  (into [:ul.font-sans]
