@@ -1,6 +1,7 @@
 (require
  '[clojure.string :as str]
  '[nextjournal.clerk :as clerk]
+ '[nextjournal.clerk.eval :as clerk.eval]
  '[nextjournal.clerk.view :as view])
 
 (comment
@@ -9,7 +10,14 @@
   (clerk/show! "notebooks/dtv.clj")
 
   (clerk/build-static-app! {:paths ["notebooks/dtv.clj"]
-                            :bundle? true}))
+                            :bundle? true})
+
+
+  (spit
+   "public/dtv/index.html"
+   (view/doc->static-html (clerk.eval/eval-file  "notebooks/index.clj")))
+  )
+
 
 (defn gen-graph! [name data]
   (let [out-path (str "dtv/"
